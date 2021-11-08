@@ -1,7 +1,5 @@
 #!/bin/python3
 """
-RimWorld Mod Manager
-
 Usage:
   rmm export [options] <file>
   rmm import [options] <file>
@@ -40,27 +38,34 @@ Options:
 """
 
 from __future__ import annotations
+
+import importlib.metadata
 import os
 import sys
-from typing import Iterable, cast, Optional
-import xml.etree.ElementTree as ET
-import argparse
 import tempfile
-import pathlib
-import docopt
 import urllib.request
-from multiprocessing import Pool
-
+import xml.etree.ElementTree as ET
 from enum import Enum
+from multiprocessing import Pool
+from typing import Iterable, Optional, cast
+
+import docopt
 from bs4 import BeautifulSoup
+
 from rmm.utils.processes import execute, run_sh
 
+__version__ = importlib.metadata.version('rmm-spoons')
 
-RMM_VERSION = "0.0.6"
 
 DEFAULT_GAME_PATHS = [
     "~/GOG Games/RimWorld",
     "~/.local/share/Steam/steamapps/common/RimWorld",
+    "/Applications/Rimworld.app/Mods"
+    "~/Library/Application Support/Steam/steamapps/common/RimWorld"
+]
+
+DEFAULT_CONFIG_FOLDER = [
+    "~/Library/Application\ Support/Rimworld/"
 ]
 
 
@@ -452,7 +457,7 @@ class CLI:
         self.workshop_path = None
 
         try:
-            arguments = docopt.docopt(__doc__, version="RMM 0.0.4", more_magic=True)
+            arguments = docopt.docopt(f"RimWorld Mod Manager\nVersion: {__version__}\n" + __doc__, version=f"RMM {__version__}", more_magic=True)
         except docopt.DocoptExit:
             arguments = {}
             print(__doc__)
@@ -461,6 +466,10 @@ class CLI:
                 sys.exit(1)
             if len(sys.argv) > 0:
                 sys.exit(0)
+
+        if arguments['-v']:
+            print (f"RMM {__version__}")
+            sys.exit(0)
 
         def check_default_paths():
             for path in DEFAULT_GAME_PATHS:
@@ -754,11 +763,7 @@ class CLI:
             )
 
     def version(self):
-        version_string = f"""rmm {RMM_VERSION}
-Copyright (C) 2021 Michael Ciociola
-License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.
-This is free software: you are free to change and redistribute it.
-There is NO WARRANTY, to the extent permitted by law."""
+        version_string = f"RMM {__version__}"
         print(version_string)
 
 
